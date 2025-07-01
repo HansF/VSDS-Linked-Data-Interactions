@@ -34,12 +34,16 @@ public class SqliteProperties implements HibernateProperties {
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
-		return Map.of("javax.persistence.jdbc.url",
-				"jdbc:sqlite:./%s/%s".formatted(databaseDirectory, getDatabaseName()),
-				HIBERNATE_DIALECT, DIALECT,
-				"javax.persistence.jdbc.driver", "org.sqlite.JDBC",
-				"hibernate.connection.provider_class", "com.zaxxer.hikari.hibernate.HikariConnectionProvider",
-				HIBERNATE_HBM_2_DDL_AUTO, keepState ? UPDATE : CREATE_DROP);
-	}
+        public Map<String, String> getProperties() {
+                var directoryPath = java.nio.file.Paths.get(databaseDirectory);
+                var databasePath = directoryPath.resolve(getDatabaseName());
+                String prefix = directoryPath.isAbsolute() ? "" : "./";
+
+                return Map.of("javax.persistence.jdbc.url",
+                                "jdbc:sqlite:%s%s".formatted(prefix, databasePath.toString()),
+                                HIBERNATE_DIALECT, DIALECT,
+                                "javax.persistence.jdbc.driver", "org.sqlite.JDBC",
+                                "hibernate.connection.provider_class", "com.zaxxer.hikari.hibernate.HikariConnectionProvider",
+                                HIBERNATE_HBM_2_DDL_AUTO, keepState ? UPDATE : CREATE_DROP);
+        }
 }

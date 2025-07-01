@@ -35,12 +35,25 @@ class SqlitePropertiesTest {
 		assertThat(result).isEqualTo(INSTANCE_NAME + ".db");
 	}
 
-	@Test
-	void test_GetProperties() {
-		Map<String, String> result = sqliteProperties.getProperties();
+        @Test
+        void test_GetProperties() {
+                Map<String, String> result = sqliteProperties.getProperties();
 
-		assertThat(result)
-				.containsEntry("javax.persistence.jdbc.url", "jdbc:sqlite:././" + INSTANCE_NAME + ".db")
-				.containsEntry(SqliteProperties.HIBERNATE_HBM_2_DDL_AUTO, SqliteProperties.UPDATE);
-	}
+                assertThat(result)
+                                .containsEntry("javax.persistence.jdbc.url", "jdbc:sqlite:./" + INSTANCE_NAME + ".db")
+                                .containsEntry(SqliteProperties.HIBERNATE_HBM_2_DDL_AUTO, SqliteProperties.UPDATE);
+        }
+
+        @Test
+        void given_absoluteDirectory_when_GetProperties_then_usesAbsolutePath() {
+                String directory = java.nio.file.Paths.get("target").toAbsolutePath().toString();
+                SqliteProperties props = new SqliteProperties(directory, INSTANCE_NAME, true);
+
+                Map<String, String> result = props.getProperties();
+
+                String expectedUrl = "jdbc:sqlite:" + java.nio.file.Paths.get(directory, INSTANCE_NAME + ".db").toString();
+                assertThat(result)
+                                .containsEntry("javax.persistence.jdbc.url", expectedUrl)
+                                .containsEntry(SqliteProperties.HIBERNATE_HBM_2_DDL_AUTO, SqliteProperties.UPDATE);
+        }
 }
